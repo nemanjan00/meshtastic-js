@@ -22,7 +22,7 @@ const START2 = 0xc3;
 
 const preamble = Buffer.from([START1, START2]);
 
-setInterval(() => {
+sendPacket = () => {
 	const packet = ToRadio.create({
 		wantConfigId: 42
 	});
@@ -33,15 +33,29 @@ setInterval(() => {
 	len.writeInt16BE(data.length);
 
 	port.write(Buffer.concat([preamble, len, data]));
-}, 1000);
+};
 
-port.on("data", data => {
-	console.log(data)
-	const packet = data.slice(4);
+const handlePacket = (data) => {
+	const len = data.readInt16BE(2);
+	const packet = data.slice(4, 4 + len);
+
+	console.log(data.length - packet.length)
 
 	try {
-		console.log(FromRadio.decode(packet));
+		const decoded = FromRadio.decode(packet);
+
+		console.log(decoded);
 	} catch (e) {
 		console.log(e.message);
 	}
+
+	if(data.length - packet.length > 4) {
+		handlePacket(data.slice(4 + packet.length));
+	}
+};
+
+port.on("data", data => {
+	handlePacket(data);
 });
+
+sendPacket();
