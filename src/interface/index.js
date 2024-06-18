@@ -17,7 +17,7 @@ const interfaceFactory = (devPath) => {
 		sendPacket: (packet) => {
 			const data = models.ToRadio.encode(packet).finish();
 
-			const len = new Buffer(2);
+			const len = Buffer.alloc(2);
 			len.writeInt16BE(data.length);
 
 			port.write(Buffer.concat([preamble, len, data]));
