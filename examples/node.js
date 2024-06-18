@@ -1,17 +1,9 @@
 const SerialPort = require("serialport").SerialPort;
-const protobuf = require("protobufjs");
-const path = require("path");
 
-const modelsRoot = new protobuf.Root();
+const events = require("events");
 
-modelsRoot.resolvePath = function (_origin, target) {
-	return path.resolve(__dirname, "../protobufs", target);
-};
-
-const models = modelsRoot.loadSync("meshtastic/mesh.proto")
-
-const ToRadio = models.lookupType("meshtastic.ToRadio");
-const FromRadio = models.lookupType("meshtastic.FromRadio");
+const models = require("../src/models");
+const lockFactory = require("../src/lock");
 
 const START1 = 0x94;
 const START2 = 0xc3;
@@ -20,10 +12,12 @@ const preamble = Buffer.from([START1, START2]);
 
 const interfacrFactory = (devPath) => {
 	const port = new SerialPort({ path: devPath, baudRate: 115200 });
+	const pipeline = new events.EventEmitter();
+	const locker = lockFactory();
 
 	const interface = {
 		sendPacket: (packet) => {
-			const data = ToRadio.encode(packet).finish();
+			const data = models.ToRadio.encode(packet).finish();
 
 			const len = new Buffer(2);
 			len.writeInt16BE(data.length);
@@ -32,25 +26,95 @@ const interfacrFactory = (devPath) => {
 		},
 
 		getNodeDB: () => {
-			const packet = ToRadio.create({
-				wantConfigId: 42
+			const id = Math.round(Math.random() * 1024);
+
+			const packet = models.ToRadio.create({
+				wantConfigId: id
 			});
 
-			interface.sendPacket(packet);
+			const data = {
+				nodes: [],
+				channels: [],
+				moduleConfig: {},
+				config: {}
+			};
+
+			return locker.getLock().then(release => {
+				return new Promise(resolve => {
+					const handler = (message) => {
+						if(message.nodeInfo) {
+							data.nodes.push(message.nodeInfo);
+
+							return;
+						}
+
+						if(message.channel) {
+							data.channels.push(message.channel);
+
+							return;
+						}
+
+						if(message.moduleConfig) {
+							data.moduleConfig = {
+								...message.moduleConfig,
+								...data.moduleConfig
+							};
+
+							return;
+						}
+
+						if(message.config) {
+							data.config = {
+								...message.config,
+								...data.config
+							};
+
+							return;
+						}
+
+						if(message.myInfo) {
+							data.myInfo = message.myInfo;
+
+							return;
+						}
+
+						if(message.metadata) {
+							data.metadata = message.metadata;
+
+							return;
+						}
+
+						if(message.configCompleteId === id) {
+							pipeline.off("message", handler);
+							release();
+
+							resolve(data);
+						}
+
+						console.log(message);
+					};
+
+					pipeline.on("message", handler);
+
+					interface.sendPacket(packet);
+				});
+			});
+		},
+
+		_handleMessage: message => {
+			pipeline.emit("message", message);
 		},
 
 		_handlePacket: (data) => {
 			const len = data.readInt16BE(2);
 			const packet = data.slice(4, 4 + len);
 
-			console.log(data.length - packet.length)
-
 			try {
-				const decoded = FromRadio.decode(packet);
+				const decoded = models.FromRadio.decode(packet);
 
-				console.log(decoded);
-			} catch (e) {
-				console.log(e.message);
+				interface._handleMessage(decoded);
+			} catch (error) {
+				console.error(error);
 			}
 
 			if(data.length - packet.length > 4) {
@@ -73,4 +137,6 @@ const interfacrFactory = (devPath) => {
 
 const interface = interfacrFactory("/dev/ttyUSB0");
 
-interface.getNodeDB();
+interface.getNodeDB().then(data => {
+	console.log(data);
+});
