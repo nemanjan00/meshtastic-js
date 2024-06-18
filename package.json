@@ -9,5 +9,8 @@
   "private": false,
   "optionalDependencies": {
     "serialport": "^12.0.0"
+  },
+  "dependencies": {
+    "protobufjs": "^7.3.2"
   }
 }
