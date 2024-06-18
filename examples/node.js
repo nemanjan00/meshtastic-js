@@ -13,49 +13,64 @@ const models = modelsRoot.loadSync("meshtastic/mesh.proto")
 const ToRadio = models.lookupType("meshtastic.ToRadio");
 const FromRadio = models.lookupType("meshtastic.FromRadio");
 
-//console.log(ToRadio);
-
-const port = new SerialPort({ path: '/dev/ttyUSB0', baudRate: 115200 });
-
 const START1 = 0x94;
 const START2 = 0xc3;
 
 const preamble = Buffer.from([START1, START2]);
 
-sendPacket = () => {
-	const packet = ToRadio.create({
-		wantConfigId: 42
+const interfacrFactory = (devPath) => {
+	const port = new SerialPort({ path: devPath, baudRate: 115200 });
+
+	const interface = {
+		sendPacket: (packet) => {
+			const data = ToRadio.encode(packet).finish();
+
+			const len = new Buffer(2);
+			len.writeInt16BE(data.length);
+
+			port.write(Buffer.concat([preamble, len, data]));
+		},
+
+		getNodeDB: () => {
+			const packet = ToRadio.create({
+				wantConfigId: 42
+			});
+
+			interface.sendPacket(packet);
+		},
+
+		_handlePacket: (data) => {
+			const len = data.readInt16BE(2);
+			const packet = data.slice(4, 4 + len);
+
+			console.log(data.length - packet.length)
+
+			try {
+				const decoded = FromRadio.decode(packet);
+
+				console.log(decoded);
+			} catch (e) {
+				console.log(e.message);
+			}
+
+			if(data.length - packet.length > 4) {
+				interface._handlePacket(data.slice(4 + packet.length));
+			}
+		},
+
+		_handleData: (data) => {
+			// TODO: Do real streaming
+			interface._handlePacket(data);
+		}
+	};
+
+	port.on("data", data => {
+		interface._handleData(data);
 	});
 
-	const data = ToRadio.encode(packet).finish();
-
-	const len = new Buffer(2);
-	len.writeInt16BE(data.length);
-
-	port.write(Buffer.concat([preamble, len, data]));
+	return interface;
 };
 
-const handlePacket = (data) => {
-	const len = data.readInt16BE(2);
-	const packet = data.slice(4, 4 + len);
+const interface = interfacrFactory("/dev/ttyUSB0");
 
-	console.log(data.length - packet.length)
-
-	try {
-		const decoded = FromRadio.decode(packet);
-
-		console.log(decoded);
-	} catch (e) {
-		console.log(e.message);
-	}
-
-	if(data.length - packet.length > 4) {
-		handlePacket(data.slice(4 + packet.length));
-	}
-};
-
-port.on("data", data => {
-	handlePacket(data);
-});
-
-sendPacket();
+interface.getNodeDB();
