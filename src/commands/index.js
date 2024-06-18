@@ -69,6 +69,8 @@ module.exports = (interface) => {
 							release();
 
 							resolve(JSON.parse(JSON.stringify(data)));
+
+							return;
 						}
 
 						console.log(message);
