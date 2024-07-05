@@ -27,7 +27,7 @@ client.on("message", (topic, message) => {
 		console.log(packet);
 		console.log(data);
 
-		if(data.portnum == 71) {
+		if(data.portnum == 71 || data.portnum == 73) {
 			clientUpstream.publish(topic, message);
 		}
 	};
