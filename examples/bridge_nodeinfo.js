@@ -23,12 +23,22 @@ client.on("message", (topic, message) => {
 
 	const keyB64 = "AQ==";
 
-	crypto.decrypt(keyB64, packet).then(data => {
+	const handleData = (data) => {
 		console.log(packet);
 		console.log(data);
 
 		if(data.portnum == 71) {
 			clientUpstream.publish(topic, message);
 		}
-	});
+	};
+
+	if(packet.encrypted) {
+		crypto.decrypt(keyB64, packet).then(data => {
+			handleData(data);
+		}).catch(console.error);
+	}
+
+	if(packet.decoded) {
+		handleData(models.Data.decode(packet.decoded));
+	}
 });
