@@ -1,5 +1,4 @@
 const crypto = require("crypto");
-const models = require("../models");
 
 const defaultKeyPrefix = () => Buffer.from("d4f1bb3a20290759f0bcffabcf4e6901", "hex");
 
@@ -45,7 +44,7 @@ const meshCrypto = {
 			});
 
 			decipher.on("end", () => {
-				resolve(models.Data.decode(decrypted));
+				resolve(decrypted);
 			});
 
 			decipher.on("error", reject);
@@ -53,6 +52,15 @@ const meshCrypto = {
 			decipher.write(packet.encrypted);
 			decipher.end();
 		});
+	},
+
+	encrypt: (keyB64, meta, packet) => {
+		const key = meshCrypto.generateKey(keyB64);
+		const iv = meshCrypto.generateIV(meta);
+
+		const cipher = crypto.createDecipheriv("aes-128-ctr", key, iv);
+
+		return cipher.update(packet).final();
 	}
 };
 

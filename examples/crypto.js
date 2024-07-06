@@ -15,7 +15,9 @@ samplePackets.forEach(packetData => {
 
 	const keyB64 = "AQ==";
 
-	crypto.decrypt(keyB64, packet).then(data => {
+	crypto.decrypt(keyB64, packet).then(decrypted => {
+		const data = models.Data.decode(decrypted);
+
 		console.log(packet);
 		console.log(data);
 
