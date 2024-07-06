@@ -37,8 +37,6 @@ client.on("connect", () => {
 				data.payload = Buffer.from("Ja sam Gonzo i velika sam legenda");
 				packet.encrypted = crypto.encrypt(keyB64, packet, models.Data.encode(data).finish());
 
-				packet.payload = Buffer.from("Ja sam Gonzo i velika sam legenda");
-
 				console.log(packet);
 
 				const encoded = models.ServiceEnvelope.encode(packetContainer).finish();
