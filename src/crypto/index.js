@@ -60,7 +60,11 @@ const meshCrypto = {
 
 		const cipher = crypto.createDecipheriv("aes-128-ctr", key, iv);
 
-		return cipher.update(packet).final();
+		const encrypted = cipher.update(packet);
+
+		cipher.final();
+
+		return encrypted;
 	}
 };
 
