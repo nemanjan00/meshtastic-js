@@ -29,12 +29,16 @@ client.on("connect", () => {
 		crypto.decrypt(keyB64, packet).then(decrypted => {
 			const data = models.Data.decode(decrypted);
 
-			packet.id = Math.round(Math.random() * 100000);
-			packet.from = 1129716344;
-			packet.rxTime = Math.round(Date.now() / 1000);
-
 			if(data.portnum == 1) {
+				console.log(packet);
+				console.log(packetData.toString("hex"));
+
 				data.payload = Buffer.from("Ja sam Gonzo i velika sam legenda");
+
+				packet.id = Math.round(Math.random() * 100000);
+				packet.from = 1129716344;
+				packet.rxTime = Math.round(Date.now() / 1000);
+
 				packet.encrypted = crypto.encrypt(keyB64, packet, models.Data.encode(data).finish());
 
 				console.log(packet);
