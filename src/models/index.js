@@ -15,5 +15,6 @@ module.exports = {
 	FromRadio: models.lookupType("meshtastic.FromRadio"),
 	MeshPacket: models.lookupType("meshtastic.MeshPacket"),
 	Data: models.lookupType("meshtastic.Data"),
+	User: models.lookupType("meshtastic.User"),
 	ServiceEnvelope: mqttModels.lookupType("meshtastic.ServiceEnvelope")
 };
