@@ -28,11 +28,11 @@ client.on("message", (topic, message) => {
 			const handleData = (decrypted) => {
 				const data = models.Data.decode(decrypted);
 
-				if(data.portnum == 1) {
+				if(data.portnum == models.PortNum.values.TEXT_MESSAGE_APP) {
 					console.log(data.payload.toString("utf8"));
 				}
 
-				if(data.portnum == 71 || data.portnum == 73) {
+				if(data.portnum == models.PortNum.values.NEIGHBORINFO_APP || data.portnum == models.PortNum.values.MAP_REPORT_APP) {
 					//packet.decoded = data;
 
 					//delete packet.encrypted;
