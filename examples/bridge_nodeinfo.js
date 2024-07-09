@@ -23,7 +23,9 @@ client.on("message", (topic, message) => {
 
 	const keyB64 = "AQ==";
 
-	const handleData = (data) => {
+	const handleData = (decrypted) => {
+		const data = models.Data.decode(decrypted);
+
 		console.log(packet);
 		console.log(data);
 
@@ -32,19 +34,21 @@ client.on("message", (topic, message) => {
 		}
 
 		if(data.portnum == 71 || data.portnum == 73) {
-			clientUpstream.publish(topic, message);
+			packet.decoded = decrypted;
+
+			delete packet.encrypted;
+
+			clientUpstream.publish(topic, models.ServiceEnvelope.encode(packetContainer).finish());
 		}
 	};
 
 	if(packet.encrypted) {
 		crypto.decrypt(keyB64, packet).then(decrypted => {
-			const data = models.Data.decode(decrypted);
-
-			handleData(data);
+			handleData(decrypted);
 		}).catch(console.error);
 	}
 
 	if(packet.decoded) {
-		handleData(models.Data.decode(packet.decoded));
+		handleData(packet.decoded);
 	}
 });
