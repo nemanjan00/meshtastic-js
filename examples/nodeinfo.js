@@ -43,6 +43,25 @@ const dbInterval = setInterval(() => {
 
 console.log("DB interval handler", dbInterval);
 
+const pollOnline = () => {
+	const hour = 60 * 60 * 1000;
+
+	Object.values(db).filter(el => el.user)
+		.forEach(user => {
+			if(Date.now() - hour < user.last_heard && !user.online) {
+				user.online = true;
+
+				sendMessage(`User ${user.user.longName} is now online 🥳`);
+			}
+
+			if(Date.now() - hour > user.last_heard && user.online) {
+				user.online = false;
+
+				sendMessage(`User ${user.user.longName} is gone 💀`);
+			}
+		});
+};
+
 const sendDB = () => {
 	console.log("Sending DB");
 
@@ -108,6 +127,8 @@ client.on("connect", () => {
 			console.error(err);
 		}
 	});
+
+	setInterval(pollOnline, 10000);
 });
 
 client.on("message", (topic, message) => {
