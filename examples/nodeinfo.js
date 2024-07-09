@@ -7,6 +7,7 @@ const models = require("../src/models");
 
 const template = Buffer.from("0a480d59b96a3315ffffffff181f2a2f0e3eb425ad7155decb682676095809fe3b3e90fcc438b1487f123836a5a23e9b310990c90bb36bf00251ef5cff52ce354a5678434803580a7803120a4d656469756d466173741a09213333366162393539", "hex");
 const messageTemplate = Buffer.from("0a2b0d59b96a3315ffffffff181f2a0faf99b9790d6e5607e8f1771d5e40d035a4d046573dd67d886648037803120a4d656469756d466173741a09213333366162393539", "hex");
+const positionTemplate = Buffer.from("0a2f0d59b96a3315ffffffff181f2a13ccd7037355b6eb6411359a2d37e57c14e2579d35ae1832773d50c18d6648037803120a4d656469756d466173741a09213333366162393539", "hex");
 
 const client = mqtt.connect(process.env.MQTT_UPSTREAM);
 
@@ -93,7 +94,47 @@ const sendDB = () => {
 
 				const encoded = models.ServiceEnvelope.encode(packetContainer).finish();
 
-				return client.publish("msh/EU_868/2/e/MediumFast/!336ab919", encoded);
+				client.publish("msh/EU_868/2/e/MediumFast/!336ab919", encoded);
+
+				return user;
+			});
+		})
+		.map(promise => {
+			return promise.then((user) => {
+				if(user.position === undefined) {
+					return;
+				}
+
+				console.log("Sending position");
+
+				const packetContainer = models.ServiceEnvelope.decode(positionTemplate);
+				const packet = packetContainer.packet;
+
+				console.log(packetContainer);
+
+				const keyB64 = "AQ==";
+
+				return crypto.decrypt(keyB64, packet).then(decrypted => {
+					const data = models.Data.decode(decrypted);
+
+					data.payload = models.Position.encode(user.position).finish();
+
+					console.log(data);
+
+					packet.id = Math.round(Math.random() * 100000);
+					packet.from = parseInt(user.user.id.replace("!", ""), 16);
+					packet.rxTime = Math.round(Date.now() / 1000);
+
+					const encrypted = crypto.encrypt(keyB64, packet, models.Data.encode(data).finish());
+
+					packet.encrypted = encrypted;
+
+					const encoded = models.ServiceEnvelope.encode(packetContainer).finish();
+
+					client.publish("msh/EU_868/2/e/MediumFast/!336ab919", encoded);
+
+					return user;
+				});
 			});
 		});
 
@@ -167,8 +208,6 @@ client.on("message", (topic, message) => {
 				db[id].user = user;
 
 				console.log(packetContainer, data, user);
-
-				console.log(message.toString("hex"));
 			}
 
 			if(data.portnum == 3) {
