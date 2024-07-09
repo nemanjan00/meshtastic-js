@@ -73,9 +73,9 @@ client.on("connect", () => {
 			if(data.portnum == 1) {
 				const message = data.payload.toString("utf8");
 				if(nodeDB[packet.from]) {
-					console.log(nodeDB[packet.from].longName, message);
+					console.log(nodeDB[packet.from].longName + ": ", message);
 				} else {
-					console.log(packet.from, message);
+					console.log(packet.from + ": ", message);
 				}
 			}
 
