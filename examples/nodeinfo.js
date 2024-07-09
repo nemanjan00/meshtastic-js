@@ -5,6 +5,8 @@ const msgpack = require("msgpack-lite");
 const crypto = require("../src/crypto");
 const models = require("../src/models");
 
+const template = Buffer.from("0a480d59b96a3315ffffffff181f2a2f0e3eb425ad7155decb682676095809fe3b3e90fcc438b1487f123836a5a23e9b310990c90bb36bf00251ef5cff52ce354a5678434803580a7803120a4d656469756d466173741a09213333366162393539", "hex");
+
 const client = mqtt.connect(process.env.MQTT_UPSTREAM);
 
 const readDB = () => {
@@ -26,6 +28,8 @@ const writeDB = data => {
 		fs.mkdirSync("./data");
 	}
 
+	console.log(data);
+
 	fs.writeFileSync("./data/db.msg", msgpack.encode(data));
 };
 
@@ -40,6 +44,35 @@ console.log("DB interval handler", dbInterval);
 
 const sendDB = () => {
 	console.log("Sending DB");
+
+	const hour = 60 * 60 * 1000;
+
+	Object.values(db).filter(el => Date.now() - hour < el.last_heard)
+		.filter(el => el.user)
+		.forEach(user => {
+			const packetContainer = models.ServiceEnvelope.decode(template);
+			const packet = packetContainer.packet;
+
+			const keyB64 = "AQ==";
+
+			crypto.decrypt(keyB64, packet).then(decrypted => {
+				const data = models.Data.decode(decrypted);
+
+				data.payload = models.User.encode(user.user).finish();
+
+				packet.id = Math.round(Math.random() * 100000);
+				packet.from = parseInt(user.user.id.replace("!", ""), 16);
+				packet.rxTime = Math.round(Date.now() / 1000);
+
+				const encrypted = crypto.encrypt(keyB64, packet, models.Data.encode(data).finish());
+
+				packet.encrypted = encrypted;
+
+				const encoded = models.ServiceEnvelope.encode(packetContainer).finish();
+
+				client.publish("msh/EU_868/2/e/MediumFast/!336ab919", encoded);
+			});
+		});
 };
 
 client.on("connect", () => {
@@ -83,6 +116,14 @@ client.on("message", (topic, message) => {
 				console.log(packetContainer, data, user);
 
 				console.log(message.toString("hex"));
+			}
+
+			if(data.portnum == 1) {
+				const message = data.payload.toString("utf8");
+
+				if(message == "nodeinfo") {
+					sendDB();
+				}
 			}
 		};
 
