@@ -36,6 +36,9 @@ const writeDB = data => {
 
 const db = readDB();
 
+//delete db["1129711616"];
+//delete db["862421116"];
+
 const dbInterval = setInterval(() => {
 	console.log("Writing DB");
 	writeDB(db);
