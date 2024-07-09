@@ -175,7 +175,9 @@ client.on("message", (topic, message) => {
 				const message = data.payload.toString("utf8");
 
 				if(message == "nodeinfo") {
-					sendDB();
+					sendDB().then(() => {
+						sendMessage("Sent NodeInfo DB")
+					});
 				}
 			}
 		};
