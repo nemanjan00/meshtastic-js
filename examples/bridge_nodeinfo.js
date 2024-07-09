@@ -18,43 +18,59 @@ client.on("message", (topic, message) => {
 	try {
 		console.log(topic, message);
 
-		if(topic.indexOf("map") === -1 && topic.indexOf("/e/") === -1) {
-			return;
-		}
+		const handlePacket = () => {
+			const packetContainer = models.ServiceEnvelope.decode(message);
 
-		const packetContainer = models.ServiceEnvelope.decode(message);
+			const packet = packetContainer.packet;
 
-		const packet = packetContainer.packet;
+			const keyB64 = "AQ==";
 
-		const keyB64 = "AQ==";
+			const handleData = (decrypted) => {
+				const data = models.Data.decode(decrypted);
 
-		const handleData = (decrypted) => {
-			const data = models.Data.decode(decrypted);
+				if(data.portnum == 1) {
+					console.log(data.payload.toString("utf8"));
+				}
 
-			if(data.portnum == 1) {
-				console.log(data.payload.toString("utf8"));
+				if(data.portnum == 71 || data.portnum == 73) {
+					packet.decoded = data;
+
+					delete packet.encrypted;
+
+					console.log(packet);
+					console.log(data);
+
+					clientUpstream.publish(topic, models.ServiceEnvelope.encode(packetContainer).finish());
+				}
+			};
+
+			if(packet.encrypted) {
+				crypto.decrypt(keyB64, packet).then(decrypted => {
+					handleData(decrypted);
+				}).catch(console.error);
 			}
 
-			if(data.portnum == 71 || data.portnum == 73) {
-				packet.decoded = decrypted;
-
-				delete packet.encrypted;
-
-				console.log(packet);
-				console.log(data);
-
-				clientUpstream.publish(topic, models.ServiceEnvelope.encode(packetContainer).finish());
+			if(packet.decoded) {
+				handleData(packet.decoded);
 			}
-		};
-
-		if(packet.encrypted) {
-			crypto.decrypt(keyB64, packet).then(decrypted => {
-				handleData(decrypted);
-			}).catch(console.error);
 		}
 
-		if(packet.decoded) {
-			handleData(packet.decoded);
+		const handleMap = () => {
+			clientUpstream.publish(topic, message);
+
+			const packetContainer = models.ServiceEnvelope.decode(message);
+
+			const packet = models.MapReport.decode(packetContainer.packet.decoded.payload);
+
+			console.log(packet);
+		}
+
+		if(topic.indexOf("/e/") !== -1) {
+			handlePacket();
+		}
+
+		if(topic.indexOf("/map/") !== -1) {
+			handleMap();
 		}
 	} catch(e) {
 		console.error(e, topic, message);
