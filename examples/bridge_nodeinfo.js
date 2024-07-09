@@ -33,9 +33,9 @@ client.on("message", (topic, message) => {
 				}
 
 				if(data.portnum == 71 || data.portnum == 73) {
-					packet.decoded = data;
+					//packet.decoded = data;
 
-					delete packet.encrypted;
+					//delete packet.encrypted;
 
 					console.log(packet);
 					console.log(data);
