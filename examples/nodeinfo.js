@@ -171,6 +171,12 @@ client.on("message", (topic, message) => {
 				console.log(message.toString("hex"));
 			}
 
+			if(data.portnum == 3) {
+				const position = models.Position.decode(data.payload);
+
+				db[packet.from].position = position;
+			}
+
 			if(data.portnum == 1) {
 				const message = data.payload.toString("utf8");
 

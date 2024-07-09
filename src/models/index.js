@@ -17,6 +17,7 @@ module.exports = {
 	MeshPacket: models.lookupType("meshtastic.MeshPacket"),
 	Data: models.lookupType("meshtastic.Data"),
 	User: models.lookupType("meshtastic.User"),
+	Position: models.lookupType("meshtastic.Position"),
 	ServiceEnvelope: mqttModels.lookupType("meshtastic.ServiceEnvelope"),
 	MapReport: mqttModels.lookupType("meshtastic.MapReport"),
 	PortNum: portnumModels.lookupEnum("meshtastic.PortNum")
