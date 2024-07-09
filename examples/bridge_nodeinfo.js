@@ -72,6 +72,10 @@ client.on("message", (topic, message) => {
 		if(topic.indexOf("/map/") !== -1) {
 			handleMap();
 		}
+
+		if(topic.indexOf("/stat/") !== -1) {
+			clientUpstream.publish(topic, message);
+		}
 	} catch(e) {
 		console.error(e, topic, message);
 	}
