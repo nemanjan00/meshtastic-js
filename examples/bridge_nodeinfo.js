@@ -32,7 +32,7 @@ client.on("message", (topic, message) => {
 					console.log(data.payload.toString("utf8"));
 				}
 
-				if(data.portnum == models.PortNum.values.NEIGHBORINFO_APP || data.portnum == models.PortNum.values.MAP_REPORT_APP) {
+				if(data.portnum == models.PortNum.values.NEIGHBORINFO_APP || data.portnum == models.PortNum.values.MAP_REPORT_APP || data.portnum == models.PortNum.values.NODEINFO_APP) {
 					//packet.decoded = data;
 
 					//delete packet.encrypted;
