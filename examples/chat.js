@@ -49,7 +49,7 @@ client.on("connect", () => {
 	};
 
 	rl.on("line", (input) => {
-		console.log(`Me: ${input}`);
+		console.log(`${new Date()} Me: ${input}`);
 
 		sendMessage(input);
 	});
@@ -73,9 +73,9 @@ client.on("connect", () => {
 			if(data.portnum == 1) {
 				const message = data.payload.toString("utf8");
 				if(nodeDB[packet.from]) {
-					console.log(nodeDB[packet.from].longName + ": ", message);
+					console.log(new Date(), nodeDB[packet.from].longName + ":", message);
 				} else {
-					console.log(packet.from + ": ", message);
+					console.log(new Date(), packet.from + ":", message);
 				}
 			}
 
@@ -88,6 +88,8 @@ client.on("connect", () => {
 
 				nodeDB[packet.from] = user;
 			}
+		}).catch(error => {
+			console.error(error, packetContainer, packet);
 		});
 	});
 });
