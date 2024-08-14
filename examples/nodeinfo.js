@@ -30,7 +30,7 @@ const writeDB = data => {
 		fs.mkdirSync("./data");
 	}
 
-	console.log(data);
+	//console.log(data);
 
 	fs.writeFileSync("./data/db.msg", msgpack.encode(data));
 };
@@ -55,7 +55,9 @@ const pollOnline = () => {
 			if(Date.now() - hour < user.last_heard && !user.online) {
 				user.online = true;
 
-				sendMessage(`User ${user.user.longName} is now online 🥳`);
+				setTimeout(() => {
+					sendMessage(`User ${user.user.longName} is now online 🥳`);
+				}, 5000);
 			}
 
 			if(Date.now() - hour > user.last_heard && user.online) {
@@ -184,9 +186,11 @@ client.on("message", (topic, message) => {
 		const packet = packetContainer.packet;
 
 		if(db[packet.from] === undefined) {
-			sendDB().then(() => {
-				return sendMessage("Dobro dosli na Meshtastic Srbija. Poslali smo vam listu aktivnih nodeova (zadnjih 1h). \n\nWelcome to Meshtastic Serbia. We have sent you a list of active nodes (last 1h)\n\nTelegram: https://t.me/meshtasticsrb");
-			});
+			setTimeout(() => {
+				sendDB().then(() => {
+					return sendMessage("Dobro dosli na Meshtastic Srbija. Poslali smo vam listu aktivnih nodeova (zadnjih 1h). \n\nWelcome to Meshtastic Serbia. We have sent you a list of active nodes (last 1h)\n\nTelegram: https://t.me/meshtasticsrb");
+				});
+			}, 5000);
 
 			db[packet.from] = {};
 		}
