@@ -7,6 +7,6 @@ pg.types.setTypeParser(pg.types.builtins.TIMESTAMP, (date) => new Date(date));
 
 const db = require("knex")({
 	client: "pg",
-	connection: config.get("POSTGRES_URL"),
+	connection: process.env.POSTGRES_URL,
 	pool: { min: 0, max: 200 }
 });
