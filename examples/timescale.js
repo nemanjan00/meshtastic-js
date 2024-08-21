@@ -68,6 +68,12 @@ client.on("connect", () => {
 				enums: String
 			});
 
+			let longName = "UNKNOWN";
+
+			if(nodeDB[packetContainer.packet.from]) {
+				longName = nodeDB[packetContainer.packet.from].user.longName;
+			}
+
 			console.log(nodeDB[packetContainer.packet.from].user);
 			console.log(dataDecoded, packetContainer)
 
@@ -92,7 +98,9 @@ client.on("connect", () => {
 
 				channel_id: packetContainer.channelId,
 
-				gateway_id: parseInt(packetContainer.gatewayId.slice(1), 16)
+				gateway_id: parseInt(packetContainer.gatewayId.slice(1), 16),
+
+				node_name: longName
 			}).then(() => {});
 		};
 
