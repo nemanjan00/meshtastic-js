@@ -1,5 +1,6 @@
 const pg = require("pg");
 const mqtt = require("mqtt");
+const fs = require("fs");
 
 const crypto = require("../src/crypto");
 const models = require("../src/models");
@@ -10,6 +11,28 @@ pg.types.setTypeParser(pg.types.builtins.NUMERIC, parseFloat);
 pg.types.setTypeParser(pg.types.builtins.TIMESTAMP, (date) => new Date(date));
 
 const client = mqtt.connect(process.env.MQTT_UPSTREAM);
+
+const readDB = () => {
+	if(!fs.existsSync("./data")) {
+		fs.mkdirSync("./data");
+	}
+
+	if(!fs.existsSync("./data/db.msg")) {
+		return {};
+	}
+
+	const data = fs.readFileSync("./data/db.msg");
+
+	return msgpack.decode(data);
+};
+
+let nodeDB = readDB();
+
+setInterval(() => {
+	try {
+		nodeDB = readDB();
+	} catch(e) {}
+}, 1000);
 
 const db = require("knex")({
 	client: "pg",
@@ -44,6 +67,7 @@ client.on("connect", () => {
 				enums: String
 			});
 
+			console.log(nodeDB);
 			console.log(dataDecoded, packetContainer)
 
 			db("packets").insert({

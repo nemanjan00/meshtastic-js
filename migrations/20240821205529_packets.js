@@ -18,9 +18,11 @@ exports.up = function(knex) {
 		table.integer("hop_limit").notNullable();
 		table.integer("hop_start").notNullable();
 
-		table.string("channel_id").notNullable();
+		table.string("channel_id", 50).notNullable();
 
 		table.bigint("gateway_id").notNullable();
+
+		table.string("node_name", 50).notNullable();
 	}).then(() => {
 		return knex.raw("SELECT create_hypertable('packets', 'rx_time');");
 	});
