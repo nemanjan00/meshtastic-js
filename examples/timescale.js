@@ -68,7 +68,7 @@ client.on("connect", () => {
 				enums: String
 			});
 
-			console.log(nodeDB);
+			console.log(nodeDB[packetContainer.packet.from].user);
 			console.log(dataDecoded, packetContainer)
 
 			db("packets").insert({
