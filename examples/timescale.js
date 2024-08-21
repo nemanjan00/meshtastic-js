@@ -1,6 +1,7 @@
 const pg = require("pg");
 const mqtt = require("mqtt");
 const fs = require("fs");
+const msgpack = require("msgpack-lite");
 
 const crypto = require("../src/crypto");
 const models = require("../src/models");
