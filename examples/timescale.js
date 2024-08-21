@@ -85,7 +85,7 @@ client.on("connect", () => {
 
 				channel: packetContainer.packet.channel,
 
-				payload: dataDecoded.data || Buffer.from(""),
+				payload: dataDecoded.payload || Buffer.from(""),
 				portnum: dataDecoded.portnum,
 
 				id: packetContainer.packet.id,
