@@ -75,7 +75,9 @@ client.on("connect", () => {
 			}
 
 			if(dataDecoded.portnum == "TELEMETRY_APP") {
-				console.log(dataDecoded);
+				const telemetry = models.Telemetry.decode(dataDecoded);
+
+				console.log(dataDecoded, telemetry);
 			}
 
 			db("packets").insert({
