@@ -74,8 +74,10 @@ client.on("connect", () => {
 				longName = nodeDB[packetContainer.packet.from].user.longName;
 			}
 
+			console.log(dataDecoded.portnum);
+
 			if(dataDecoded.portnum == "TELEMETRY_APP") {
-				const telemetry = models.Telemetry.decode(dataDecoded);
+				const telemetry = models.Telemetry.decode(dataDecoded.payload);
 
 				console.log(dataDecoded, telemetry);
 			}
