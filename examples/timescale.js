@@ -80,6 +80,30 @@ client.on("connect", () => {
 				const telemetry = models.Telemetry.decode(dataDecoded.payload);
 
 				console.log(dataDecoded, telemetry);
+
+				Object.keys(telemetry).forEach(key => {
+					if(telemetry[key] instanceof Object) {
+						Object.keys(telemetry[key]).forEach(property => {
+							const name = `${key}.${property}`;
+							const value = telemetry[key][property];
+
+							db("telemetry").insert({
+								rx_time: new Date(telemetry.time * 1000),
+								from: packetContainer.packet.from,
+
+								name,
+
+								value,
+
+								channel_id: packetContainer.channelId,
+
+								gateway_id: parseInt(packetContainer.gatewayId.slice(1), 16),
+
+								node_name: longName
+							}).then(() => {});
+						});
+					}
+				});
 			}
 
 			db("packets").insert({
