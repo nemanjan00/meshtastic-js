@@ -81,7 +81,7 @@ client.on("connect", () => {
 
 				console.log(position);
 
-				db("telemetry").insert({
+				db("place").insert({
 					rx_time: new Date(position.time * 1000),
 					from: packetContainer.packet.from,
 
