@@ -76,6 +76,10 @@ client.on("connect", () => {
 
 			console.log(dataDecoded.portnum);
 
+			if(dataDecoded.portnum == "POSITION_APP") {
+
+			}
+
 			if(dataDecoded.portnum == "TELEMETRY_APP") {
 				const telemetry = models.Telemetry.decode(dataDecoded.payload);
 

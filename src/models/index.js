@@ -22,5 +22,6 @@ module.exports = {
 	ServiceEnvelope: mqttModels.lookupType("meshtastic.ServiceEnvelope"),
 	MapReport: mqttModels.lookupType("meshtastic.MapReport"),
 	PortNum: portnumModels.lookupEnum("meshtastic.PortNum"),
-	Telemetry: telemetryModels.lookupType("meshtastic.Telemetry")
+	Telemetry: telemetryModels.lookupType("meshtastic.Telemetry"),
+	Position: models.lookupType("meshtastic.Position")
 };
