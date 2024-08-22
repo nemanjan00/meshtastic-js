@@ -77,13 +77,13 @@ client.on("connect", () => {
 			console.log(dataDecoded.portnum);
 
 			if(dataDecoded.portnum == "POSITION_APP") {
+				const position = models.Position.decode(dataDecoded.payload);
 
+				console.log(position);
 			}
 
 			if(dataDecoded.portnum == "TELEMETRY_APP") {
 				const telemetry = models.Telemetry.decode(dataDecoded.payload);
-
-				console.log(dataDecoded, telemetry);
 
 				Object.keys(telemetry).forEach(key => {
 					if(telemetry[key] instanceof Object) {
