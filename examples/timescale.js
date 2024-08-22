@@ -85,8 +85,8 @@ client.on("connect", () => {
 					rx_time: new Date(position.time * 1000),
 					from: packetContainer.packet.from,
 
-					latitude: position.latitudeI,
-					longitude: position.longitudeI,
+					latitude: position.latitudeI / 10000000,
+					longitude: position.longitudeI / 10000000,
 					altitude: position.altitude,
 					precision_bits: position.precisionBits,
 
