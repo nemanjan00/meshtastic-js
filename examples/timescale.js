@@ -80,6 +80,22 @@ client.on("connect", () => {
 				const position = models.Position.decode(dataDecoded.payload);
 
 				console.log(position);
+
+				db("telemetry").insert({
+					rx_time: new Date(position.time * 1000),
+					from: packetContainer.packet.from,
+
+					latitude: position.latitudeI,
+					longitude: position.longitudeI,
+					altitude: position.altitude,
+					precision_bits: position.precisionBits,
+
+					channel_id: packetContainer.channelId,
+
+					gateway_id: parseInt(packetContainer.gatewayId.slice(1), 16),
+
+					node_name: longName
+				}).then(() => {});
 			}
 
 			if(dataDecoded.portnum == "TELEMETRY_APP") {
