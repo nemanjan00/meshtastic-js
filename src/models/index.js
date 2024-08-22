@@ -10,6 +10,7 @@ modelsRoot.resolvePath = function (_origin, target) {
 const models = modelsRoot.loadSync("meshtastic/mesh.proto")
 const mqttModels = modelsRoot.loadSync("meshtastic/mqtt.proto")
 const portnumModels = modelsRoot.loadSync("meshtastic/portnums.proto")
+const telemetryModels = modelsRoot.loadSync("meshtastic/telemetry.proto")
 
 module.exports = {
 	ToRadio: models.lookupType("meshtastic.ToRadio"),
@@ -20,5 +21,6 @@ module.exports = {
 	Position: models.lookupType("meshtastic.Position"),
 	ServiceEnvelope: mqttModels.lookupType("meshtastic.ServiceEnvelope"),
 	MapReport: mqttModels.lookupType("meshtastic.MapReport"),
-	PortNum: portnumModels.lookupEnum("meshtastic.PortNum")
+	PortNum: portnumModels.lookupEnum("meshtastic.PortNum"),
+	Telemetry: telemetryModels.lookupEnum("meshtastic.Telemetry")
 };

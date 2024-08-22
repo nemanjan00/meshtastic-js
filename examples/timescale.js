@@ -74,8 +74,9 @@ client.on("connect", () => {
 				longName = nodeDB[packetContainer.packet.from].user.longName;
 			}
 
-			console.log(nodeDB[packetContainer.packet.from].user);
-			console.log(dataDecoded, packetContainer)
+			if(dataDecoded.portnum == "TELEMETRY_APP") {
+				console.log(dataDecoded);
+			}
 
 			db("packets").insert({
 				rx_time: new Date(packetContainer.packet.rxTime * 1000),
