@@ -14,7 +14,7 @@ const client = mqtt.connect(process.env.MQTT_UPSTREAM);
 
 const getWeather = (city) => {
 	return http.get(`https://wttr.in/${city}?T`).then(response => {
-		return response.body.split("┌")[0].split("<pre>")[1];
+		return response.body.split("┌")[0].split("<pre>")[1].trim();
 	});
 };
 
@@ -237,23 +237,20 @@ client.on("message", (topic, message) => {
 				}
 
 				if(message == "telegram") {
-					sendDB().then(() => {
-						sendMessage("Telegram: https://t.me/meshtasticsrb");
-					});
+					sendMessage("Telegram: https://t.me/meshtasticsrb");
 				}
 
 				if(message == "docs") {
-					sendDB().then(() => {
-						sendMessage("Documentation: https://shorturl.at/PihU6");
-					});
+					sendMessage("Documentation: https://shorturl.at/PihU6");
 				}
 
 				if(message.indexOf("weather") === 0) {
-					sendDB().then(() => {
-						getWeather(message.split("weather ")[1]).then(response => {
-							sendMessage(response);
-						}).catch(console.error);
-					});
+					getWeather(message.split("weather ")[1]).then(response => {
+						const lines = response.split("\n").filter(el => el != "");
+						sendMessage(lines.shift());
+
+						sendMessage(lines.join("\n"));
+					}).catch(console.error);
 				}
 			}
 		};
