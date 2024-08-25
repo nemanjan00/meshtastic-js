@@ -62,6 +62,7 @@ client.on("connect", () => {
 		handledPackage[packet.id] = true;
 
 		const handleData = (decrypted) => {
+
 			const data = models.Data.decode(decrypted);
 
 			const dataDecoded = models.Data.toObject(data, {
