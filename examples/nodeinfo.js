@@ -188,7 +188,7 @@ client.on("message", (topic, message) => {
 		if(db[packet.from] === undefined) {
 			setTimeout(() => {
 				sendDB().then(() => {
-					return sendMessage("Dobro dosli na Meshtastic Srbija. Poslali smo vam listu aktivnih nodeova (zadnjih 1h). \n\nWelcome to Meshtastic Serbia. We have sent you a list of active nodes (last 1h)\n\nTelegram: https://t.me/meshtasticsrb");
+					return sendMessage("Dobro dosli na Meshtastic Srbija. Poslali smo vam listu aktivnih nodeova (zadnjih 1h). \n\nWelcome to Meshtastic Serbia. We have sent you a list of active nodes (last 1h)\n\nTelegram: https://t.me/meshtasticsrb\n\n Documentation: https://shorturl.at/PihU6");
 				});
 			}, 5000);
 
