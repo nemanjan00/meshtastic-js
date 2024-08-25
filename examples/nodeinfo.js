@@ -1,6 +1,7 @@
 const mqtt = require("mqtt");
 const fs = require("fs");
 const msgpack = require("msgpack-lite");
+const http = require("got-verbose");
 
 const crypto = require("../src/crypto");
 const models = require("../src/models");
@@ -10,6 +11,12 @@ const messageTemplate = Buffer.from("0a2b0d59b96a3315ffffffff181f2a0faf99b9790d6
 const positionTemplate = Buffer.from("0a2f0d59b96a3315ffffffff181f2a13ccd7037355b6eb6411359a2d37e57c14e2579d35ae1832773d50c18d6648037803120a4d656469756d466173741a09213333366162393539", "hex");
 
 const client = mqtt.connect(process.env.MQTT_UPSTREAM);
+
+const getWeather = (city) => {
+	return http.get(`https://wttr.in/${city}?T`).then(response => {
+		return response.body.split("┌")[0].split("<pre>")[1];
+	});
+};
 
 const readDB = () => {
 	if(!fs.existsSync("./data")) {
@@ -188,7 +195,7 @@ client.on("message", (topic, message) => {
 		if(db[packet.from] === undefined) {
 			setTimeout(() => {
 				sendDB().then(() => {
-					return sendMessage("Dobro dosli na Meshtastic Srbija. Poslali smo vam listu aktivnih nodeova (zadnjih 1h). \n\nWelcome to Meshtastic Serbia. We have sent you a list of active nodes (last 1h)\n\nTelegram: https://t.me/meshtasticsrb\n\n Documentation: https://shorturl.at/PihU6");
+					return sendMessage("Dobro dosli na Meshtastic Srbija. Poslali smo vam listu aktivnih nodeova (zadnjih 1h). \n\nWelcome to Meshtastic Serbia. We have sent you a list of active nodes (last 1h)\n\nTelegram: https://t.me/meshtasticsrb\n\nDocumentation: https://shorturl.at/PihU6");
 				});
 			}, 5000);
 
@@ -226,6 +233,26 @@ client.on("message", (topic, message) => {
 				if(message == "nodeinfo") {
 					sendDB().then(() => {
 						sendMessage("Sent NodeInfo DB")
+					});
+				}
+
+				if(message == "telegram") {
+					sendDB().then(() => {
+						sendMessage("Telegram: https://t.me/meshtasticsrb");
+					});
+				}
+
+				if(message == "docs") {
+					sendDB().then(() => {
+						sendMessage("Documentation: https://shorturl.at/PihU6");
+					});
+				}
+
+				if(message.indexOf("weather") === 0) {
+					sendDB().then(() => {
+						getWeather(message.split("weather ")[1]).then(response => {
+							sendMessage(response);
+						}).catch(console.error);
 					});
 				}
 			}
