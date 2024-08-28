@@ -83,7 +83,7 @@ client.on("connect", () => {
 				console.log(position);
 
 				db("place").insert({
-					rx_time: Date.now(),
+					rx_time: new Date(),
 					from: packetContainer.packet.from,
 
 					latitude: position.latitudeI / 10000000,
@@ -109,7 +109,7 @@ client.on("connect", () => {
 							const value = telemetry[key][property];
 
 							db("telemetry").insert({
-								rx_time: Date.now(),
+								rx_time: new Date(),
 								from: packetContainer.packet.from,
 
 								name,
@@ -128,7 +128,7 @@ client.on("connect", () => {
 			}
 
 			db("packets").insert({
-				rx_time: Date.now(),
+				rx_time: new Date(),
 
 				from: packetContainer.packet.from,
 				to: packetContainer.packet.to,
