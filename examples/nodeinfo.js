@@ -250,7 +250,9 @@ client.on("message", (topic, message) => {
 						sendMessage(lines.shift());
 
 						sendMessage(lines.join("\n"));
-					}).catch(console.error);
+					}).catch(() => {
+						sendMessage("Hope it is sunny 🕶️ [404]");
+					});
 				}
 			}
 		};
