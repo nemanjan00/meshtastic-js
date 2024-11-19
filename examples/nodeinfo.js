@@ -63,14 +63,14 @@ const pollOnline = () => {
 				user.online = true;
 
 				setTimeout(() => {
-					sendMessage(`User ${user.user.longName} is now online 🥳`);
+					//sendMessage(`User ${user.user.longName} is now online 🥳`);
 				}, 5000);
 			}
 
 			if(Date.now() - hour > user.last_heard && user.online) {
 				user.online = false;
 
-				sendMessage(`User ${user.user.longName} is gone 💀`);
+				//sendMessage(`User ${user.user.longName} is gone 💀`);
 			}
 		});
 };
@@ -194,11 +194,12 @@ client.on("message", (topic, message) => {
 
 		if(db[packet.from] === undefined) {
 			setTimeout(() => {
-				sendDB().then(() => {
-					return sendMessage("Dobro dosli na Meshtastic Srbija. Poslali smo vam listu aktivnih nodeova (zadnjih 1h). \n\nWelcome to Meshtastic Serbia. We have sent you a list of active nodes (last 1h)\n\nTelegram: https://t.me/meshtasticsrb\n\nDocumentation: https://shorturl.at/PihU6");
-				});
-			}, 5000);
+				sendDB();
+			}, 70000);
 
+			setTimeout(() => {
+				return sendMessage("Dobro dosli na Meshtastic Srbija. Poslali smo vam listu aktivnih nodeova (zadnjih 1h). \n\nWelcome to Meshtastic Serbia. We have sent you a list of active nodes (last 1h)\n\nTelegram: https://t.me/meshtasticsrb\n\nDocumentation: https://shorturl.at/PihU6");
+			}, 60000);
 			db[packet.from] = {};
 		}
 
@@ -230,22 +231,32 @@ client.on("message", (topic, message) => {
 			if(data.portnum == 1) {
 				const message = data.payload.toString("utf8");
 
-				if(message == "nodeinfo") {
+				if(message.toLowerCase() == "nodeinfo") {
 					sendDB().then(() => {
 						sendMessage("Sent NodeInfo DB")
 					});
 				}
 
-				if(message == "telegram") {
+				if(message.toLowerCase() == "telegram") {
 					sendMessage("Telegram: https://t.me/meshtasticsrb");
 				}
 
-				if(message == "docs") {
+				if(message.toLowerCase() == "docs") {
 					sendMessage("Documentation: https://shorturl.at/PihU6");
 				}
 
+				if(message.toLowerCase() == "ping") {
+					sendMessage("pong");
+				}
+
 				if(message.indexOf("weather") === 0) {
-					getWeather(message.split("weather ")[1]).then(response => {
+					const place = message.split("weather ")[1];
+
+					if(place.trim() == "arilje") {
+						return sendMessage("Odoh ja u Arilje, da izmerim 😠");
+					}
+
+					getWeather(place).then(response => {
 						const lines = response.split("\n").filter(el => el != "");
 						sendMessage(lines.shift());
 

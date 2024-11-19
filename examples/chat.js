@@ -55,41 +55,53 @@ client.on("connect", () => {
 	});
 
 	client.on("message", (topic, packetData) => {
-		const packetContainer = models.ServiceEnvelope.decode(packetData);
+		try {
+			const packetContainer = models.ServiceEnvelope.decode(packetData);
 
-		const packet = packetContainer.packet;
+			const packet = packetContainer.packet;
 
-		if(handledPackage[packet.id]) {
-			return;
+			if(handledPackage[packet.id]) {
+				return;
+			}
+
+			handledPackage[packet.id] = true;
+
+			const keyB64 = "AQ==";
+
+			const handleData = (decrypted) => {
+				const data = models.Data.decode(decrypted);
+
+				if(data.portnum == 1) {
+					const message = data.payload.toString("utf8");
+					if(nodeDB[packet.from]) {
+						console.log(new Date(), nodeDB[packet.from].longName + ":", message);
+					} else {
+						console.log(new Date(), packet.from + ":", message);
+					}
+				}
+
+				if(data.portnum == 4) {
+					const user = models.User.decode(data.payload);
+
+					if(!nodeDB[packet.from]) {
+						console.log(`New user ${user.longName}`);
+					}
+
+					nodeDB[packet.from] = user;
+				}
+			};
+
+			if(packet.encrypted) {
+				crypto.decrypt(keyB64, packet).then(decrypted => {
+					handleData(decrypted);
+				}).catch(console.error);
+			}
+
+			if(packet.decoded) {
+				handleData(packet.decoded);
+			}
+		} catch(error) {
+			console.error(e.message);
 		}
-
-		handledPackage[packet.id] = true;
-
-		const keyB64 = "AQ==";
-
-		crypto.decrypt(keyB64, packet).then(decrypted => {
-			const data = models.Data.decode(decrypted);
-
-			if(data.portnum == 1) {
-				const message = data.payload.toString("utf8");
-				if(nodeDB[packet.from]) {
-					console.log(new Date(), nodeDB[packet.from].longName + ":", message);
-				} else {
-					console.log(new Date(), packet.from + ":", message);
-				}
-			}
-
-			if(data.portnum == 4) {
-				const user = models.User.decode(data.payload);
-
-				if(!nodeDB[packet.from]) {
-					console.log(`New user ${user.longName}`);
-				}
-
-				nodeDB[packet.from] = user;
-			}
-		}).catch(error => {
-			console.error(error, packetContainer, packet);
-		});
 	});
 });

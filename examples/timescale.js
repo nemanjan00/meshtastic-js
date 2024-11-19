@@ -69,7 +69,7 @@ client.on("connect", () => {
 				enums: String
 			});
 
-			let longName = "UNKNOWN";
+			let longName = "UNKNOWN " + parseInt(packetContainer.gatewayId.slice(1), 16);
 
 			if(nodeDB[packetContainer.packet.from]) {
 				longName = nodeDB[packetContainer.packet.from].user.longName;
