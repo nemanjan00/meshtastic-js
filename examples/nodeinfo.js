@@ -75,6 +75,8 @@ const pollOnline = () => {
 		});
 };
 
+const processed = {};
+
 const sendDB = () => {
 	console.log("Sending DB");
 
@@ -192,6 +194,12 @@ client.on("message", (topic, message) => {
 
 		const packet = packetContainer.packet;
 
+		if(processed[packet.id]) {
+			return;
+		}
+
+		processed[packet.id] = true;
+
 		if(db[packet.from] === undefined) {
 			setTimeout(() => {
 				sendDB();
@@ -249,8 +257,8 @@ client.on("message", (topic, message) => {
 					sendMessage("pong");
 				}
 
-				if(message.indexOf("weather") === 0) {
-					const place = message.split("weather ")[1];
+				if(message.toLowerCase().indexOf("weather") === 0 && message.indexOf("Weather report") === -1) {
+					const place = message.toLowerCase().split("weather ")[1];
 
 					if(place.trim() == "arilje") {
 						return sendMessage("Odoh ja u Arilje, da izmerim 😠");

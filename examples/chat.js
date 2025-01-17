@@ -101,7 +101,7 @@ client.on("connect", () => {
 				handleData(packet.decoded);
 			}
 		} catch(error) {
-			console.error(e.message);
+			console.error(error);
 		}
 	});
 });
