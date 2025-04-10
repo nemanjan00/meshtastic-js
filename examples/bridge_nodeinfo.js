@@ -33,9 +33,11 @@ client.on("message", (topic, message) => {
 				}
 
 				if(data.portnum == models.PortNum.values.NEIGHBORINFO_APP || data.portnum == models.PortNum.values.MAP_REPORT_APP || data.portnum == models.PortNum.values.NODEINFO_APP) {
-					//packet.decoded = data;
+					if(packet.encrypted) {
+						packet.decoded = data;
 
-					//delete packet.encrypted;
+						delete packet.encrypted;
+					}
 
 					console.log(packet);
 					console.log(data);

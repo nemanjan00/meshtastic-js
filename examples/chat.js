@@ -25,6 +25,10 @@ client.on("connect", () => {
 
 		const packet = packetContainer.packet;
 
+
+		packet.hopLimit = 8;
+		packet.hopStart = 8;
+
 		const keyB64 = "AQ==";
 
 		crypto.decrypt(keyB64, packet).then(decrypted => {

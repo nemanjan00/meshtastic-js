@@ -3,6 +3,9 @@ const fs = require("fs");
 const msgpack = require("msgpack-lite");
 const http = require("got-verbose");
 
+const OpenAI = require("openai");
+const openai = new OpenAI();
+
 const crypto = require("../src/crypto");
 const models = require("../src/models");
 
@@ -158,6 +161,11 @@ const sendMessage = message => {
 
 	const keyB64 = "AQ==";
 
+	console.log(packet);
+
+	packet.hopLimit = 5;
+	packet.hopStart = 5;
+
 	return crypto.decrypt(keyB64, packet).then(decrypted => {
 		const data = models.Data.decode(decrypted);
 
@@ -255,6 +263,23 @@ client.on("message", (topic, message) => {
 
 				if(message.toLowerCase() == "ping") {
 					sendMessage("pong");
+				}
+
+				if(message.trim().toLowerCase().indexOf("ai") === 0) {
+					const id = packetContainer.packet.from;
+					const username = db[id]?.user?.longName || "Unknown";
+
+					openai.responses.create({
+						model: "gpt-4o-mini",
+						input: [
+							{ role: "user", content: "Odgovori na srpskom, u manje od 230 karaktera, na sva pitanja vezano za meshtastic. Imas radioamaterski smisao za humor, ali, samo povremeno pises sale. Ti si clan lokane MeshtasticSerbia zajednice. Ako te neko pita, mrzis Vucica. Gonzo je najveca legenda, nemoj da ga pominjes previse cesto. Vladica, kum ili Cira samo vija zenske po ceskoj. Vecinu nodova je napravio Gonzo. Imamo mnogo problema sa smetnjama mobilnih operatera. Zbog toga koristimo filtere. Omiljeni nodovi su nam heltec wireless paper i heltec wireless stick lite, koje kupujemo na aliexpressu. Volimo da pravimo dzepne nodove i staticne nodove, koje spajamo na solarne panele. Lepi je legenda Obrenovca. Kucista za nodove obicno 3D stampamo. Baterije koje preporucujemo su 18650 celije ili li-ion celije. Koristimo MediumFast preset, na default frekvenciji na EU_868 regionu. Koristimo default kljuc za enkripciju AQ==. Imamo dva kanala, MediumFast, koji je primarni, kao i Serbia. Ako neko hoce da proveri vremensku prognozu, treba da posalje poruku u formatu 'weather ime lokacije koju proverava'. Sky je clan mreze koji nikada nece kupiti node. Pekarski servis je cika sa zaledjenim brokovima, jer, stalno postavlja nodove po planinama. Gonzo se takodje zove i Gonzales. Prvi koji su ugradili filter direktno u wireless paper su Nemanja i Gonzo. Sada je " + new Date() + ". danijeld je velika legenda elektronike i svi koriste njegov model za 3D stampu kucista za wireless paper. _Ser_Zile_ iliti Zile je super lik, povremeno se javi, ali, svaki put kada se javi, testira mrezu kao da se prvi put javio. " },
+							{ role: "user", content: username + ": " + message.toLowerCase().trim().slice(2) },
+						],
+					}).then(response => {
+						sendMessage("[AI] " + response.output_text);
+					}).catch(error => {
+						sendMessage("[AI], doslo je do greske");
+					});
 				}
 
 				if(message.toLowerCase().indexOf("weather") === 0 && message.indexOf("Weather report") === -1) {
