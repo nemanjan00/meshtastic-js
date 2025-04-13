@@ -13,6 +13,8 @@ const interfaceFactory = (devPath) => {
 	const pipeline = new events.EventEmitter();
 
 	const interface = {
+		_buffer: Buffer.from([]),
+
 		pipeline,
 		sendPacket: (packet) => {
 			const data = models.ToRadio.encode(packet).finish();
@@ -27,9 +29,30 @@ const interfaceFactory = (devPath) => {
 			pipeline.emit("message", message);
 		},
 
-		_handlePacket: (data) => {
-			const len = data.readInt16BE(2);
-			const packet = data.slice(4, 4 + len);
+		_handlePacket: () => {
+			const start1 = interface._buffer.indexOf(START1);
+
+			if(start1 === -1) {
+				return;
+			}
+
+			const start2 = interface._buffer.indexOf(START2);
+
+			if(start2 === -1) {
+				return;
+			}
+
+			if(interface._buffer.length < start2 + 3) {
+				return;
+			}
+
+			const len = interface._buffer.readInt16BE(start2 + 1);
+
+			const packet = interface._buffer.slice(start1 + 4, start1 + 4 + len);
+
+			if(packet.length < len) {
+				return;
+			}
 
 			try {
 				const decoded = models.FromRadio.decode(packet);
@@ -39,13 +62,14 @@ const interfaceFactory = (devPath) => {
 				console.error(error);
 			}
 
-			if(data.length - packet.length > 4) {
-				interface._handlePacket(data.slice(4 + packet.length));
-			}
+			interface._buffer = interface._buffer.slice(start1 + 4 + len)
+
+			interface._handlePacket();
 		},
 
 		_handleData: (data) => {
-			// TODO: Do real streaming
+			interface._buffer = Buffer.concat([interface._buffer, data]);
+
 			interface._handlePacket(data);
 		}
 	};
