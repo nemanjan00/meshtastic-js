@@ -62,10 +62,7 @@ client.on("connect", () => {
 
 			handledPackage[packet.id] = true;
 
-			const handleData = (decrypted) => {
-
-				const data = models.Data.decode(decrypted);
-
+			const handleData = (data) => {
 				const dataDecoded = models.Data.toObject(data, {
 					enums: String
 				});
@@ -159,7 +156,9 @@ client.on("connect", () => {
 
 			if(packet.encrypted) {
 				crypto.decrypt(keyB64, packet).then(decrypted => {
-					handleData(decrypted);
+					const data = models.Data.decode(decrypted);
+
+					handleData(data);
 				}).catch(console.error);
 			}
 

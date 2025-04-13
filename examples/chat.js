@@ -49,6 +49,8 @@ client.on("connect", () => {
 
 				 client.publish("msh/EU_868/2/e/MediumFast/!336ab919", encoded);
 			}
+		}).catch(error => {
+			console.error(error, packet);
 		});
 	};
 
