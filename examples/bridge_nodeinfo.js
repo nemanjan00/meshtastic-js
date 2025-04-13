@@ -32,7 +32,7 @@ client.on("message", (topic, message) => {
 
 				if(data.portnum == models.PortNum.values.NEIGHBORINFO_APP || data.portnum == models.PortNum.values.MAP_REPORT_APP || data.portnum == models.PortNum.values.NODEINFO_APP) {
 					if(packet.encrypted) {
-						packet.decoded = decrypted;
+						packet.decoded = models.Data.encode(data);
 
 						delete packet.encrypted;
 					}
