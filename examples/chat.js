@@ -74,9 +74,7 @@ client.on("connect", () => {
 
 			const keyB64 = "AQ==";
 
-			const handleData = (decrypted) => {
-				const data = models.Data.decode(decrypted);
-
+			const handleData = (data) => {
 				if(data.portnum == 1) {
 					const message = data.payload.toString("utf8");
 					if(nodeDB[packet.from]) {
@@ -99,7 +97,9 @@ client.on("connect", () => {
 
 			if(packet.encrypted) {
 				crypto.decrypt(keyB64, packet).then(decrypted => {
-					handleData(decrypted);
+					const data = models.Data.decode(decrypted);
+
+					handleData(data);
 				}).catch(console.error);
 			}
 
