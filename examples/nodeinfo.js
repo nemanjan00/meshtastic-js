@@ -223,9 +223,7 @@ client.on("message", (topic, message) => {
 
 		const keyB64 = "AQ==";
 
-		const handleData = (decrypted) => {
-			const data = models.Data.decode(decrypted);
-
+		const handleData = (data) => {
 			if(data.portnum == models.PortNum.values.NODEINFO_APP) {
 				const user = models.User.decode(data.payload);
 
@@ -303,7 +301,9 @@ client.on("message", (topic, message) => {
 
 		if(packet.encrypted) {
 			crypto.decrypt(keyB64, packet).then(decrypted => {
-				handleData(decrypted);
+				const data = models.Data.decode(decrypted);
+
+				handleData(data);
 			}).catch(console.error);
 		}
 
