@@ -304,7 +304,9 @@ client.on("message", (topic, message) => {
 				const data = models.Data.decode(decrypted);
 
 				handleData(data);
-			}).catch(console.error);
+			}).catch(error => {
+				console.error(error, packet);
+			});
 		}
 
 		if(packet.decoded) {
