@@ -50,46 +50,102 @@ client.on("connect", () => {
 		}
 	});
 
-	client.on("message", (_topic, packetData) => {
-		const packetContainer = models.ServiceEnvelope.decode(packetData);
+	client.on("message", (topic, packetData) => {
+		try {
+			const packetContainer = models.ServiceEnvelope.decode(packetData);
 
-		const packet = packetContainer.packet;
+			const packet = packetContainer.packet;
 
-		if(handledPackage[packet.id]) {
-			return;
-		}
-
-		handledPackage[packet.id] = true;
-
-		const handleData = (decrypted) => {
-
-			const data = models.Data.decode(decrypted);
-
-			const dataDecoded = models.Data.toObject(data, {
-				enums: String
-			});
-
-			let longName = "UNKNOWN " + parseInt(packetContainer.gatewayId.slice(1), 16);
-
-			if(nodeDB[packetContainer.packet.from]) {
-				longName = nodeDB[packetContainer.packet.from].user.longName;
+			if(handledPackage[packet.id]) {
+				return;
 			}
 
-			console.log(dataDecoded.portnum);
+			handledPackage[packet.id] = true;
 
-			if(dataDecoded.portnum == "POSITION_APP") {
-				const position = models.Position.decode(dataDecoded.payload);
+			const handleData = (decrypted) => {
 
-				console.log(position);
+				const data = models.Data.decode(decrypted);
 
-				db("place").insert({
+				const dataDecoded = models.Data.toObject(data, {
+					enums: String
+				});
+
+				let longName = "UNKNOWN " + parseInt(packetContainer.gatewayId.slice(1), 16);
+
+				if(nodeDB[packetContainer.packet.from]) {
+					longName = nodeDB[packetContainer.packet.from].user.longName;
+				}
+
+				console.log(dataDecoded.portnum);
+
+				if(dataDecoded.portnum == "POSITION_APP") {
+					const position = models.Position.decode(dataDecoded.payload);
+
+					console.log(position);
+
+					db("place").insert({
+						rx_time: new Date(),
+						from: packetContainer.packet.from,
+
+						latitude: position.latitudeI / 10000000,
+						longitude: position.longitudeI / 10000000,
+						altitude: position.altitude,
+						precision_bits: position.precisionBits,
+
+						channel_id: packetContainer.channelId,
+
+						gateway_id: parseInt(packetContainer.gatewayId.slice(1), 16),
+
+						node_name: longName
+					}).then(() => {});
+				}
+
+				if(dataDecoded.portnum == "TELEMETRY_APP") {
+					const telemetry = models.Telemetry.decode(dataDecoded.payload);
+
+					Object.keys(telemetry).forEach(key => {
+						if(telemetry[key] instanceof Object) {
+							Object.keys(telemetry[key]).forEach(property => {
+								const name = `${key}.${property}`;
+								const value = telemetry[key][property];
+
+								db("telemetry").insert({
+									rx_time: new Date(),
+									from: packetContainer.packet.from,
+
+									name,
+
+									value,
+
+									channel_id: packetContainer.channelId,
+
+									gateway_id: parseInt(packetContainer.gatewayId.slice(1), 16),
+
+									node_name: longName
+								}).then(() => {});
+							});
+						}
+					});
+				}
+
+				db("packets").insert({
 					rx_time: new Date(),
-					from: packetContainer.packet.from,
 
-					latitude: position.latitudeI / 10000000,
-					longitude: position.longitudeI / 10000000,
-					altitude: position.altitude,
-					precision_bits: position.precisionBits,
+					from: packetContainer.packet.from,
+					to: packetContainer.packet.to,
+
+					channel: packetContainer.packet.channel,
+
+					payload: dataDecoded.payload || Buffer.from(""),
+					portnum: dataDecoded.portnum,
+
+					id: packetContainer.packet.id,
+
+					rx_snr: packetContainer.packet.rxSnr,
+					rx_rssi: packetContainer.packet.rxRssi,
+
+					hop_limit: packetContainer.packet.hopLimit,
+					hop_start: packetContainer.packet.hopStart,
 
 					channel_id: packetContainer.channelId,
 
@@ -97,73 +153,21 @@ client.on("connect", () => {
 
 					node_name: longName
 				}).then(() => {});
+			};
+
+			const keyB64 = "AQ==";
+
+			if(packet.encrypted) {
+				crypto.decrypt(keyB64, packet).then(decrypted => {
+					handleData(decrypted);
+				}).catch(console.error);
 			}
 
-			if(dataDecoded.portnum == "TELEMETRY_APP") {
-				const telemetry = models.Telemetry.decode(dataDecoded.payload);
-
-				Object.keys(telemetry).forEach(key => {
-					if(telemetry[key] instanceof Object) {
-						Object.keys(telemetry[key]).forEach(property => {
-							const name = `${key}.${property}`;
-							const value = telemetry[key][property];
-
-							db("telemetry").insert({
-								rx_time: new Date(),
-								from: packetContainer.packet.from,
-
-								name,
-
-								value,
-
-								channel_id: packetContainer.channelId,
-
-								gateway_id: parseInt(packetContainer.gatewayId.slice(1), 16),
-
-								node_name: longName
-							}).then(() => {});
-						});
-					}
-				});
+			if(packet.decoded) {
+				handleData(packet.decoded);
 			}
-
-			db("packets").insert({
-				rx_time: new Date(),
-
-				from: packetContainer.packet.from,
-				to: packetContainer.packet.to,
-
-				channel: packetContainer.packet.channel,
-
-				payload: dataDecoded.payload || Buffer.from(""),
-				portnum: dataDecoded.portnum,
-
-				id: packetContainer.packet.id,
-
-				rx_snr: packetContainer.packet.rxSnr,
-				rx_rssi: packetContainer.packet.rxRssi,
-
-				hop_limit: packetContainer.packet.hopLimit,
-				hop_start: packetContainer.packet.hopStart,
-
-				channel_id: packetContainer.channelId,
-
-				gateway_id: parseInt(packetContainer.gatewayId.slice(1), 16),
-
-				node_name: longName
-			}).then(() => {});
-		};
-
-		const keyB64 = "AQ==";
-
-		if(packet.encrypted) {
-			crypto.decrypt(keyB64, packet).then(decrypted => {
-				handleData(decrypted);
-			}).catch(console.error);
-		}
-
-		if(packet.decoded) {
-			handleData(packet.decoded);
+		} catch (e) {
+			console.error(e, topic, packetData);
 		}
 	});
 });
