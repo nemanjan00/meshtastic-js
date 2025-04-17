@@ -5,6 +5,14 @@ const models = require("../src/models");
 
 const client = mqtt.connect(process.env.MQTT_UPSTREAM);
 const clientUpstream = mqtt.connect("mqtt://meshdev:large4cats@mqtt.meshtastic.org");
+const client1Upstream = mqtt.connect("mqtt://uplink:uplik@mqtt.meshtastic.liamcotlete.net");
+
+// meshtastic bitfield flags
+const BITFIELD_OK_TO_MQTT_SHIFT = 0;
+const BITFIELD_OK_TO_MQTT_MASK = (1 << BITFIELD_OK_TO_MQTT_SHIFT);
+
+const BITFIELD_WANT_RESPONSE_SHIFT = 1;
+const BITFIELD_WANT_RESPONSE_MASK = (1 << BITFIELD_WANT_RESPONSE_SHIFT)
 
 client.on("connect", () => {
 	client.subscribe("msh/EU_868/2/#", (err) => {
@@ -26,11 +34,12 @@ client.on("message", (topic, message) => {
 			const keyB64 = "AQ==";
 
 			const handleData = (data) => {
-				if(data.portnum == models.PortNum.values.TEXT_MESSAGE_APP) {
-					console.log(data.payload.toString("utf8"));
-				}
+				if(data.portnum == models.PortNum.values.NEIGHBORINFO_APP || data.portnum == models.PortNum.values.MAP_REPORT_APP || data.portnum == models.PortNum.values.NODEINFO_APP || data.portnum == models.PortNum.values.POSITION_APP) {
+					console.log("POSITION_APP", data.portnum == models.PortNum.values.POSITION_APP);
+					//client1Upstream.publish(topic, models.ServiceEnvelope.encode(packetContainer).finish());
 
-				if(data.portnum == models.PortNum.values.NEIGHBORINFO_APP || data.portnum == models.PortNum.values.MAP_REPORT_APP || data.portnum == models.PortNum.values.NODEINFO_APP) {
+					data.bitfield = (data.bitfield || 0) | BITFIELD_OK_TO_MQTT_MASK | BITFIELD_WANT_RESPONSE_MASK;
+
 					if(packet.encrypted) {
 						packet.decoded = data;
 
@@ -41,6 +50,7 @@ client.on("message", (topic, message) => {
 					console.log(data);
 
 					clientUpstream.publish(topic, models.ServiceEnvelope.encode(packetContainer).finish());
+					client1Upstream.publish(topic, models.ServiceEnvelope.encode(packetContainer).finish());
 				}
 			};
 
@@ -58,6 +68,7 @@ client.on("message", (topic, message) => {
 		}
 
 		const handleMap = () => {
+			client1Upstream.publish(topic, message);
 			clientUpstream.publish(topic, message);
 
 			const packetContainer = models.ServiceEnvelope.decode(message);
@@ -76,6 +87,7 @@ client.on("message", (topic, message) => {
 		}
 
 		if(topic.indexOf("/stat/") !== -1) {
+			client1Upstream.publish(topic, message);
 			clientUpstream.publish(topic, message);
 		}
 	} catch(e) {
