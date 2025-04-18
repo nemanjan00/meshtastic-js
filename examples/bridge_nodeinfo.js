@@ -48,6 +48,7 @@ client.on("message", (topic, message) => {
 
 					console.log(packet);
 					console.log(data);
+					console.log(models.ServiceEnvelope.decode(models.ServiceEnvelope.encode(packetContainer).finish()));
 
 					clientUpstream.publish(topic, models.ServiceEnvelope.encode(packetContainer).finish());
 					client1Upstream.publish(topic, models.ServiceEnvelope.encode(packetContainer).finish());
