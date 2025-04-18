@@ -101,41 +101,15 @@ const sendPosition = () => {
 
 	const nodes = Object.values(nodeDB).filter(el => Date.now() - hour < el.last_heard)
 		.filter(el => el.user)
-		.filter(el => el.position);
+		.filter(el => el.position)
+		.filter(el => el.magic);
 
 	const nextNodeId = ++node % nodes.length;
 
 	const nextNode = nodes[nextNodeId];
 
-	const sendMap = (node) => {
-		console.log(node);
-		const packetContainer = models.ServiceEnvelope.decode(mapTemplate);
-
-		const id = parseInt(node.user.id.slice(1), 16);
-
-		packetContainer.packet.from = id;
-
-		const payload = models.MapReport.decode(packetContainer.packet.decoded.payload);
-
-		payload.hwModel = node.user.hwModel;
-		payload.longName = node.user.longName;
-		payload.shortName = node.user.shortName;
-
-		payload.latitudeI = node.position.latitudeI;
-		payload.longitudeI = node.position.longitudeI;
-
-		packetContainer.packet.decoded.payload = models.MapReport.encode(payload).finish();
-
-		clients.forEach(client => {
-			client.publish(mapTopic, models.ServiceEnvelope.encode(packetContainer).finish());
-		});
-	};
-
 	const sendPosition = (node) => {
-		if(!node.magic) {
-			return;
-		}
-
+		console.log(node.user.longName);
 		const packetContainer = models.ServiceEnvelope.decode(positionTemplate);
 
 		const id = parseInt(node.user.id.slice(1), 16);
@@ -171,11 +145,48 @@ const sendPosition = () => {
 		});
 	}
 
-	sendMap(nextNode);
 	sendPosition(nextNode);
 };
 
+const sendMap = () => {
+	const hour = 60 * 60 * 1000;
+
+	const nodes = Object.values(nodeDB).filter(el => Date.now() - hour < el.last_heard)
+		.filter(el => el.user)
+		.filter(el => el.position);
+
+	const nextNodeId = ++node % nodes.length;
+
+	const nextNode = nodes[nextNodeId];
+
+	const sendMap = (node) => {
+		const packetContainer = models.ServiceEnvelope.decode(mapTemplate);
+
+		const id = parseInt(node.user.id.slice(1), 16);
+
+		packetContainer.packet.from = id;
+
+		const payload = models.MapReport.decode(packetContainer.packet.decoded.payload);
+
+		payload.hwModel = node.user.hwModel;
+		payload.longName = node.user.longName;
+		payload.shortName = node.user.shortName;
+
+		payload.latitudeI = node.position.latitudeI;
+		payload.longitudeI = node.position.longitudeI;
+
+		packetContainer.packet.decoded.payload = models.MapReport.encode(payload).finish();
+
+		clients.forEach(client => {
+			client.publish(mapTopic, models.ServiceEnvelope.encode(packetContainer).finish());
+		});
+	};
+
+	sendMap(nextNode);
+};
+
 setInterval(sendPosition, 60 * 1000);
-//setInterval(sendPosition, 1000);
+setInterval(sendMap, 5 * 1000);
 
 sendPosition();
+sendMap();
