@@ -242,6 +242,14 @@ client.on("message", (topic, message) => {
 				db[packet.from].position = position;
 			}
 
+			if(data.portnum == 67) {
+				const telemetry = models.Telemetry.decode(data.payload);
+
+				console.log(telemetry);
+
+				//db[packet.from].position = position;
+			}
+
 			if(data.portnum == 1) {
 				const message = data.payload.toString("utf8");
 
