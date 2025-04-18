@@ -95,7 +95,7 @@ client.on("connect", () => {
 				}
 			};
 
-			if(packet.encrypted) {
+			if(packet.encrypted && packet.encrypted.length > 0) {
 				crypto.decrypt(keyB64, packet).then(decrypted => {
 					const data = models.Data.decode(decrypted);
 

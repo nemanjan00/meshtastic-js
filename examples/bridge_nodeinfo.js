@@ -40,7 +40,7 @@ client.on("message", (topic, message) => {
 
 					data.bitfield = (data.bitfield || 0) | BITFIELD_OK_TO_MQTT_MASK | BITFIELD_WANT_RESPONSE_MASK;
 
-					if(packet.encrypted) {
+					if(packet.encrypted && packet.encrypted.length > 0) {
 						packet.decoded = data;
 
 						delete packet.encrypted;
@@ -55,7 +55,7 @@ client.on("message", (topic, message) => {
 				}
 			};
 
-			if(packet.encrypted) {
+			if(packet.encrypted && packet.encrypted.length > 0) {
 				crypto.decrypt(keyB64, packet).then(decrypted => {
 					const data = models.Data.decode(decrypted);
 
