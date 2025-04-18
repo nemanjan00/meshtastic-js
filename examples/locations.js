@@ -135,6 +135,8 @@ const sendPosition = () => {
 
 			data.payload = models.Position.encode(payload).finish();
 
+			console.log(payload);
+
 			const encrypted = crypto.encrypt(keyB64, packetContainer.packet, models.Data.encode(data).finish());
 
 			packetContainer.packet.encrypted = encrypted;
