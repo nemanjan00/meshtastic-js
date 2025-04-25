@@ -14,28 +14,33 @@ const positionTemplate = Buffer.from("0a430dbcf78bda15ffffffff181f2a2180a92ff393
 
 const fixedNodes = {
 	"433b92a0": { // Borca
-		latitudeI: 44.876212 * 10000000,
-		longitudeI: 20.449736 * 10000000
+		latitudeI: parseInt(44.876212 * 10000000),
+		longitudeI: parseInt(20.449736 * 10000000)
 	},
 
 	"433b8e88": { // Mirjevo
-		latitudeI: 44.791897 * 10000000,
-		longitudeI: 20.531957 * 10000000
+		latitudeI: parseInt(44.791897 * 10000000),
+		longitudeI: parseInt(20.531957 * 10000000)
 	},
 
 	"4359c64c": { // Slankamen
-		latitudeI: 45.16024 * 10000000,
-		longitudeI: 20.19808 * 10000000
+		latitudeI: parseInt(45.16024 * 10000000),
+		longitudeI: parseInt(20.19808 * 10000000)
 	},
 
 	"43561a78": { // Vrsacki Breg
-		latitudeI: 45.12354 * 10000000,
-		longitudeI: 21.34409 * 10000000
+		latitudeI: parseInt(45.12354 * 10000000),
+		longitudeI: parseInt(21.34409 * 10000000)
 	},
 
 	"da56f678": { // Radio Klub
-		latitudeI: 44.86879 * 10000000,
-		longitudeI: 20.64018 * 10000000
+		latitudeI: parseInt(44.86879 * 10000000),
+		longitudeI: parseInt(20.64018 * 10000000)
+	},
+
+	"4359c5b8": { // BNSS
+		latitudeI: parseInt(44.98308 * 10000000),
+		longitudeI: parseInt(20.77286 * 10000000)
 	}
 };
 
@@ -60,15 +65,15 @@ const update = () => {
 		Object.keys(fixedNodes).forEach(key => {
 			const node = nodeDB[parseInt(key, 16)];
 
-			node.position = node.position || {
+			node.position = {
 				latitudeI: 445550157,
 				longitudeI: 205459459,
 				altitude: 32,
-				time: 1257174955,
+				time: parseInt(Date.now() / 1000),
 				locationSource: 3,
 				groundSpeed: 0,
 				groundTrack: 0,
-				precisionBits: 16
+				precisionBits: 13
 			};
 
 			node.magic = true;
@@ -130,8 +135,10 @@ const sendPosition = () => {
 			payload.latitudeI = node.position.latitudeI || payload.latitudeI;
 			payload.longitudeI = node.position.longitudeI || payload.longitudeI;
 			payload.altitude = node.position.altitude || payload.altitude;
-			payload.time = Date.now();
+			payload.time = parseInt(Date.now() / 1000);
 			payload.precisionBits = node.position.precisionBits || payload.precisionBits;
+
+			console.log(payload);
 
 			data.payload = models.Position.encode(payload).finish();
 

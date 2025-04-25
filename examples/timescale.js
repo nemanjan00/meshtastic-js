@@ -78,7 +78,7 @@ client.on("connect", () => {
 				if(dataDecoded.portnum == "POSITION_APP") {
 					const position = models.Position.decode(dataDecoded.payload);
 
-					console.log(position);
+					console.log(position, longName);
 
 					db("place").insert({
 						rx_time: new Date(),
