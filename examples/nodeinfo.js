@@ -13,6 +13,8 @@ const template = Buffer.from("0a480d59b96a3315ffffffff181f2a2f0e3eb425ad7155decb
 const messageTemplate = Buffer.from("0a2b0d59b96a3315ffffffff181f2a0faf99b9790d6e5607e8f1771d5e40d035a4d046573dd67d886648037803120a4d656469756d466173741a09213333366162393539", "hex");
 const positionTemplate = Buffer.from("0a2f0d59b96a3315ffffffff181f2a13ccd7037355b6eb6411359a2d37e57c14e2579d35ae1832773d50c18d6648037803120a4d656469756d466173741a09213333366162393539", "hex");
 
+const wrapper = require("queue-promised").wrapper;
+
 const client = mqtt.connect(process.env.MQTT_UPSTREAM);
 
 const getWeather = (city) => {
@@ -56,6 +58,13 @@ const dbInterval = setInterval(() => {
 }, 5000)
 
 console.log("DB interval handler", dbInterval);
+
+const sendPacket = wrapper((packet) => {
+	return client.publish("msh/EU_868/2/e/MediumFast/!336ab919", packet);
+}, {
+	count: 1,
+	minTime: 5000
+});
 
 const pollOnline = () => {
 	const hour = 60 * 60 * 1000;
@@ -108,7 +117,7 @@ const sendDB = () => {
 
 				const encoded = models.ServiceEnvelope.encode(packetContainer).finish();
 
-				client.publish("msh/EU_868/2/e/MediumFast/!336ab919", encoded);
+				sendPacket(encoded);
 
 				return user;
 			});
@@ -145,7 +154,7 @@ const sendDB = () => {
 
 					const encoded = models.ServiceEnvelope.encode(packetContainer).finish();
 
-					client.publish("msh/EU_868/2/e/MediumFast/!336ab919", encoded);
+					sendPacket(encoded);
 
 					return user;
 				});
@@ -180,7 +189,7 @@ const sendMessage = message => {
 
 		const encoded = models.ServiceEnvelope.encode(packetContainer).finish();
 
-		return client.publish("msh/EU_868/2/e/MediumFast/!336ab919", encoded);
+		sendPacket(encoded);
 	});
 };
 

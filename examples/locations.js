@@ -152,7 +152,7 @@ const sendPosition = () => {
 		});
 	}
 
-	sendPosition(nextNode);
+	sendPosition();
 };
 
 const sendMap = () => {

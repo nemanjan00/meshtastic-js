@@ -17,6 +17,7 @@
     "msgpack-lite": "^0.1.26",
     "openai": "^4.93.0",
     "protobufjs": "^7.3.2",
+    "queue-promised": "^0.0.30",
     "websocket": "^1.0.35"
   },
   "devDependencies": {
