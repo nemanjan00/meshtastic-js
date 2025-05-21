@@ -223,7 +223,9 @@ client.on("message", (topic, message) => {
 			}, 70000);
 
 			setTimeout(() => {
-				return sendMessage("Dobro dosli na Meshtastic Srbija. Poslali smo vam listu aktivnih nodeova (zadnjih 1h). \n\nWelcome to Meshtastic Serbia. We have sent you a list of active nodes (last 1h)\n\nTelegram: https://t.me/meshtasticsrb\n\nDocumentation: https://shorturl.at/PihU6");
+				sendMessage("Dobro dosli na Meshtastic Srbija. Poslali smo vam listu aktivnih nodeova (zadnjih 1h). ");
+				sendMessage("Welcome to Meshtastic Serbia. We have sent you a list of active nodes (last 1h)");
+				sendMessage("Telegram: https://t.me/meshtasticsrb\n\nDocumentation: https://shorturl.at/PihU6");
 			}, 60000);
 			db[packet.from] = {};
 		}
