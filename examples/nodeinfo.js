@@ -27,7 +27,7 @@ const sendToTelegram = (username, message) => {
 			"message_thread_id": 34953,
 			"text": `*${username}*: ${message}`,
 			"parse_mode":"Markdown"
-		});
+		})
 	}).catch(console.error);
 };
 
