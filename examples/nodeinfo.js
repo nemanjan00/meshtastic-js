@@ -73,9 +73,11 @@ const dbInterval = setInterval(() => {
 
 console.log("DB interval handler", dbInterval);
 
-const sendPacket = wrapper((packet) => {
+const sendPacketWithoutWaiting = (packet) => {
 	return client.publish("msh/EU_868/2/e/MediumFast/!336ab919", packet);
-}, {
+};
+
+const sendPacket = wrapper(sendPacketWithoutWaiting, {
 	count: 1,
 	minTime: 5000
 });
@@ -203,7 +205,7 @@ const sendMessage = message => {
 
 		const encoded = models.ServiceEnvelope.encode(packetContainer).finish();
 
-		sendPacket(encoded);
+		sendPacketWithoutWaiting(encoded);
 	});
 };
 
