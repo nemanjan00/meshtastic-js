@@ -1,4 +1,4 @@
-const mqtt = require("mqtt");
+const mqtt = require("mqtt")
 const fs = require("fs");
 const msgpack = require("msgpack-lite");
 const http = require("got-verbose");
@@ -16,6 +16,20 @@ const positionTemplate = Buffer.from("0a2f0d59b96a3315ffffffff181f2a13ccd7037355
 const wrapper = require("queue-promised").wrapper;
 
 const client = mqtt.connect(process.env.MQTT_UPSTREAM);
+
+const sendToTelegram = (username, message) => {
+	return http.post(`https://api.telegram.org/bot${process.env.TELEGRAM_TOKEN}/sendMessage`, {
+		headers: {
+			"Content-Type": "Application/json"
+		},
+		body: JSON.stringify({
+			"chat_id": "-1001947919285",
+			"message_thread_id": 34953,
+			"text": `*${username}*: ${message}`,
+			"parse_mode":"Markdown"
+		});
+	}).catch(console.error);
+};
 
 const getWeather = (city) => {
 	return http.get(`https://wttr.in/${city}?T`).then(response => {
@@ -263,6 +277,14 @@ client.on("message", (topic, message) => {
 
 			if(data.portnum == 1) {
 				const message = data.payload.toString("utf8");
+
+				const user = db[packet.from] || {
+					user: {
+						longName: "Unknown"
+					}
+				};
+
+				sendToTelegram(user.user.longName, message);
 
 				if(message.toLowerCase() == "nodeinfo") {
 					sendDB().then(() => {
