@@ -105,7 +105,7 @@ const pollOnline = () => {
 
 const processed = {};
 
-const sendDB = () => {
+const _sendDB = () => {
 	console.log("Sending DB");
 
 	const hour = 60 * 60 * 1000;
@@ -180,6 +180,10 @@ const sendDB = () => {
 	return Promise.all(promises);
 };
 
+const sendDB = () => {
+	return sendMessage("Sending nodeinfo is currently disabled");
+};
+
 const sendMessage = message => {
 	const packetContainer = models.ServiceEnvelope.decode(messageTemplate);
 	const packet = packetContainer.packet;
@@ -235,12 +239,8 @@ client.on("message", (topic, message) => {
 
 		if(db[packet.from] === undefined) {
 			setTimeout(() => {
-				sendDB();
-			}, 70000);
-
-			setTimeout(() => {
-				sendMessage("Dobro dosli na Meshtastic Srbija. Poslali smo vam listu aktivnih nodeova (zadnjih 1h). ");
-				sendMessage("Welcome to Meshtastic Serbia. We have sent you a list of active nodes (last 1h)");
+				sendMessage("Dobro dosli na Meshtastic Srbija");
+				sendMessage("Welcome to Meshtastic Serbia");
 				sendMessage("Telegram: https://t.me/meshtasticsrb\n\nDocumentation: https://shorturl.at/PihU6");
 			}, 60000);
 			db[packet.from] = {};
