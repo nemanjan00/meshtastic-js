@@ -290,7 +290,7 @@ client.on("message", (topic, message) => {
 
 				if(message.toLowerCase() == "nodeinfo") {
 					sendDB().then(() => {
-						sendMessage("Sent NodeInfo DB")
+						//sendMessage("Sent NodeInfo DB")
 					});
 				}
 
