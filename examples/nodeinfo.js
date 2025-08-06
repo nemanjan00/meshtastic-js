@@ -239,7 +239,7 @@ client.on("message", (topic, message) => {
 
 		if(db[packet.from] === undefined) {
 			setTimeout(() => {
-				sendMessage("Dobro dosli na Meshtastic Srbija");
+				sendMessage(`Dobro dosli na Meshtastic Srbija (${packet.from})`);
 				sendMessage("Welcome to Meshtastic Serbia");
 				sendMessage("Telegram: https://t.me/meshtasticsrb\n\nDocumentation: https://shorturl.at/PihU6");
 			}, 60000);
