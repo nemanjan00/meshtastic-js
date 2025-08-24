@@ -280,7 +280,7 @@ client.on("message", (topic, message) => {
 			if(data.portnum == 1) {
 				console.log(packet.to);
 
-				if(packet.to != 2998283580) {
+				if(packet.to != 4294967295) {
 					return;
 				}
 
