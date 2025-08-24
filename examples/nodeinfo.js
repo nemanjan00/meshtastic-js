@@ -278,6 +278,12 @@ client.on("message", (topic, message) => {
 			}
 
 			if(data.portnum == 1) {
+				console.log(packegt);
+
+				if(packet.to != 2998283580) {
+					return;
+				}
+
 				const message = data.payload.toString("utf8");
 
 				const user = db[packet.from] || {
