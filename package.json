@@ -13,6 +13,7 @@
   "dependencies": {
     "forever": "^4.0.3",
     "got-verbose": "^0.0.1",
+    "lz4": "^0.6.5",
     "mqtt": "^5.8.0",
     "msgpack-lite": "^0.1.26",
     "openai": "^4.93.0",
