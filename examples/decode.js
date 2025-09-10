@@ -2,15 +2,27 @@ const crypto = require("../src/crypto");
 const models = require("../src/models");
 const readline = require("readline");
 
-const data = Buffer.from("6D E3 CE 51 DA CA C8 AD E7 1F 00 6D 2B 90 94 26 4C A3 AA 1A E6 84".split(" ").join(""), "hex");
+const data = Buffer.from("FFFFFFFF6DE3CE51EDCAC8AD631F006D24566D2A6F94A1D91DAD".split(" ").join(""), "hex");
 
 const print = data => {
 	const packet = {
-		from: data.readUint32LE(),
-		id: data.readUint32LE(4),
-		to: data.readUint32LE(8),
-		encrypted: data.slice(12)
+		to: data.readUint32LE(0),
+		from: data.readUint32LE(4),
+		id: data.readUint32LE(8),
+		flagsByte: data.readUint8(12),
+		channel: data.readUint8(13),
+		nextHop: data.readUint8(14),
+		relayNode: data.readUint8(15),
+		encrypted: data.slice(16)
 	};
+
+
+	packet.flags = {};
+
+	packet.flags.hopLimit = packet.flagsByte & 0x07;
+	packet.flags.wantAck = (packet.flagsByte & 0x08) >> 3;
+	packet.flags.viaMqtt = (packet.flagsByte & 0x10) >> 4;
+	packet.flags.hopStart = (packet.flagsByte & 0xE0) >> 5;
 
 	const keyB64 = "AQ==";
 
