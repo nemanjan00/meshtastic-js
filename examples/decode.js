@@ -21,7 +21,7 @@ const print = data => {
 			enums: String
 		});
 
-		console.log(dataDecoded);
+		console.log(packet, dataDecoded);
 	});
 };
 
