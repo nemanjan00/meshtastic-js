@@ -30,7 +30,7 @@ const print = data => {
 
 		const keyB64 = "AQ==";
 
-		packet++;
+		count++;
 
 		crypto.decrypt(keyB64, packet).then(data => {
 			const decoded = models.Data.decode(data);
