@@ -17,6 +17,7 @@ const print = data => {
 			encrypted: data.slice(16)
 		};
 
+		packet.fromHex = packet.from.toString(16);
 
 		packet.flags = {};
 
