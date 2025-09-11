@@ -4,6 +4,8 @@ const readline = require("readline");
 
 const data = Buffer.from("FFFFFFFF6DE3CE51EDCAC8AD631F006D24566D2A6F94A1D91DAD".split(" ").join(""), "hex");
 
+let counter = 0;
+
 const print = data => {
 	try {
 		const packet = {
@@ -27,6 +29,8 @@ const print = data => {
 		packet.flags.hopStart = (packet.flagsByte & 0xE0) >> 5;
 
 		const keyB64 = "AQ==";
+
+		packet++;
 
 		crypto.decrypt(keyB64, packet).then(data => {
 			const decoded = models.Data.decode(data);
@@ -54,3 +58,9 @@ input.on("line", line => {
 
 	print(data);
 });
+
+setInterval(() => {
+	console.log(`Packets counter: ${counter}`);
+
+	counter = 0;
+}, 60 * 1000);
