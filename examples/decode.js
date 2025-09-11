@@ -44,7 +44,7 @@ const print = data => {
 			console.log(packet, "Not decrypted");
 		});
 	} catch (error) {
-		console.error(`Failed to decode ${line}`);
+		console.error(`Failed to decode ${data}`);
 	}
 };
 
