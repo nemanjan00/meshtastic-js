@@ -30,7 +30,7 @@ const print = data => {
 
 		const keyB64 = "AQ==";
 
-		count++;
+		counter++;
 
 		crypto.decrypt(keyB64, packet).then(data => {
 			const decoded = models.Data.decode(data);
@@ -44,11 +44,11 @@ const print = data => {
 			console.log(packet, "Not decrypted");
 		});
 	} catch (error) {
-		console.error(`Failed to decode ${data.toString("hex")}`);
+		console.error(`Failed to decode ${data.toString("hex")}`, error);
 	}
 };
 
-//print(data);
+print(data);
 
 const input = readline.createInterface(process.stdin);
 
