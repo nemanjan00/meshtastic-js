@@ -44,7 +44,7 @@ const print = data => {
 			console.log(packet, "Not decrypted");
 		});
 	} catch (error) {
-		console.error(`Failed to decode ${data}`);
+		console.error(`Failed to decode ${data.toString("hex")}`);
 	}
 };
 
