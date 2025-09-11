@@ -48,7 +48,7 @@ const print = data => {
 	}
 };
 
-print(data);
+//print(data);
 
 const input = readline.createInterface(process.stdin);
 
