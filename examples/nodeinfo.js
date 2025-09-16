@@ -74,7 +74,8 @@ const dbInterval = setInterval(() => {
 console.log("DB interval handler", dbInterval);
 
 const sendPacketWithoutWaiting = (packet) => {
-	return client.publish("msh/EU_868/2/e/MediumFast/!336ab919", packet);
+	return Promise.resolve();
+	//return client.publish("msh/EU_868/2/e/MediumFast/!336ab919", packet);
 };
 
 const sendPacket = wrapper(sendPacketWithoutWaiting, {
