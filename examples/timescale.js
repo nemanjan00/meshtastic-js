@@ -98,7 +98,7 @@ client.on("connect", () => {
 				}
 
 				if(dataDecoded.portnum == "NODEINFO_APP") {
-					console.log("NODE INFO", dataDecoded.payload, packetContainer);
+					console.log("NODE INFO", dataDecoded, packetContainer);
 
 				}
 
