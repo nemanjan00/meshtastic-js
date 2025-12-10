@@ -97,6 +97,11 @@ client.on("connect", () => {
 					}).then(() => {});
 				}
 
+				if(dataDecoded.portnum == "NODEINFO_APP") {
+					console.log("NODE INFO", dataDecoded.payload, packetContainer);
+
+				}
+
 				if(dataDecoded.portnum == "TELEMETRY_APP") {
 					const telemetry = models.Telemetry.decode(dataDecoded.payload);
 
